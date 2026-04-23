@@ -11,8 +11,8 @@ TagManager:
   - 
   - Water
   - UI
-  - turet
-  - body
+  - Body
+  - Turet
   - 
   - 
   - 
@@ -41,10 +41,10 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: turet
+  - name: Body
     uniqueID: 4290313003
     locked: 0
-  - name: body
+  - name: Turet
     uniqueID: 999642693
     locked: 0
   m_RenderingLayers:
