@@ -1,2 +1,16 @@
 fileFormatVersion: 2
 guid: 30dad81d4528b7447a08db3472063a7e
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - bulletPrefab: {fileID: 8574284942286320148, guid: c390135d7069e544e9b77120e6abc62a, type: 3}
+  - firePoint: {instanceID: 0}
+  - tankBody: {instanceID: 0}
+  - muzzleFlash: {instanceID: 0}
+  - smokeEffect: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
