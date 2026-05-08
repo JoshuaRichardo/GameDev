@@ -13,6 +13,10 @@ public class TankHealth : MonoBehaviour
     // UBAH JADI PUBLIC agar bisa ditarik langsung dari Inspector
     public Animator anim; 
 
+    [Header("Audio")] 
+    public AudioSource engineSound; 
+    public AudioSource explosionSound; // TAMBAHAN BARU: Variabel untuk suara ledakan
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -62,6 +66,18 @@ public class TankHealth : MonoBehaviour
         {
             anim.enabled = true; 
             anim.SetTrigger("Die"); 
+        }
+
+        // TAMBAHKAN INI UNTUK MEMATIKAN SUARA MESIN SAAT HANCUR
+        if (engineSound != null)
+        {
+            engineSound.Stop();
+        }
+
+        // TAMBAHAN BARU: Mainkan suara ledakan saat tank hancur
+        if (explosionSound != null)
+        {
+            explosionSound.Play();
         }
     }
 }

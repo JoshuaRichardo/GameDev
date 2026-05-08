@@ -21,6 +21,9 @@ public class TankShooting : MonoBehaviour
     public ParticleSystem muzzleFlash;
     public ParticleSystem smokeEffect;
 
+    [Header("Audio")] // TAMBAHKAN INI
+    public AudioSource shootSound; // TAMBAHKAN INI
+
     private void Awake() => controls = new InputMaster();
     private void OnEnable() => controls.Player.Enable();
     private void OnDisable() => controls.Player.Disable();
@@ -55,6 +58,12 @@ public class TankShooting : MonoBehaviour
         // 2. Efek Visual
         if (muzzleFlash != null) muzzleFlash.Play();
         if (smokeEffect != null) smokeEffect.Play();
+
+        // TAMBAHKAN BAGIAN INI UNTUK MEMUTAR SUARA
+        if (shootSound != null)
+        {
+            shootSound.Play();
+        }
 
         // 3. Efek Mundur Realistik
         StartCoroutine(ApplyRealRecoil());
