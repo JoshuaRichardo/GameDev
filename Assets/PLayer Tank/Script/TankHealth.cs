@@ -65,8 +65,8 @@ public class TankHealth : MonoBehaviour
 
         // PENGAMAN: Skrip di bawah ini hanya akan dimatikan JIKA komponennya memang ada di Tank.
         // Ini mencegah "compiler error" atau "null reference" jika nama skrip berbeda.
-        //if (TryGetComponent(out MonoBehaviour playerTank)) { playerTank.enabled = false; }
-        //if (TryGetComponent(out MonoBehaviour tankShooting)) { tankShooting.enabled = false; }
+        if (TryGetComponent(out MonoBehaviour playerTank)) { playerTank.enabled = false; }
+        if (TryGetComponent(out MonoBehaviour tankShooting)) { tankShooting.enabled = false; }
         
         // Mematikan skrip turret di anak (child) objek jika ada
         MonoBehaviour turretScript = GetComponentInChildren<MonoBehaviour>();
