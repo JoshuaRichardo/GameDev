@@ -3,16 +3,37 @@ using UnityEngine;
 public class Bullet : MonoBehaviour
 {
     [Header("Movement")]
-    public float speed = 40f; // Peluru tank asli sangat cepat
+    public float speed = 40f; 
     public float lifeTime = 3f;
+    public float maxRange = 50f; // Jarak maksimal peluru sebelum meledak
 
     [Header("Effects")]
-    public GameObject impactEffectPrefab; // Prefab ledakan kecil/percikan api
-    public TrailRenderer bulletTrail;    // Tarik Trail Renderer ke sini
+    public GameObject impactEffectPrefab; 
+    public TrailRenderer bulletTrail;    
+
+    private Vector3 startPosition;
+
+    public int damage = 100; // Default 100 to kill enemy in one hit
+    public GameObject shooter; // Simpan siapa yang menembak agar tidak menabrak diri sendiri
 
     void Start()
     {
-        // Hancurkan peluru otomatis jika tidak mengenai apapun
+        startPosition = transform.position;
+
+        // FIX: Pastikan peluru berada di paling depan (on top) tapi di bawah muzzle flash
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null)
+        {
+            sr.sortingLayerName = "Turet"; // Layer tertinggi
+            sr.sortingOrder = 90; // Di bawah muzzle flash (100)
+        }
+        if (bulletTrail != null)
+        {
+            bulletTrail.sortingLayerName = "Turet";
+            bulletTrail.sortingOrder = 90;
+        }
+
+        // Hancurkan peluru otomatis jika tidak mengenai apapun dalam waktu tertentu
         Destroy(gameObject, lifeTime);
     }
 
@@ -20,25 +41,75 @@ public class Bullet : MonoBehaviour
     {
         // Bergerak maju berdasarkan arah lokal peluru (sumbu X positif)
         transform.Translate(Vector3.right * speed * Time.deltaTime);
+
+        // RANGE CHECK: Jika jarak sudah melebihi maxRange, meledak
+        if (Vector3.Distance(startPosition, transform.position) >= maxRange)
+        {
+            Explode();
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        // Jangan menabrak tank sendiri atau sesama peluru
-        if (collision.CompareTag("Player") || collision.CompareTag("Bullet")) return;
-
-        // 1. Munculkan efek ledakan di titik benturan
-        if (impactEffectPrefab != null)
+        // Jangan meledak jika menabrak shooter sendiri, sesama peluru, Tanah, bagian Turet, atau Batas Map
+        if (collision.gameObject == shooter || 
+            collision.CompareTag("Bullet") || 
+            collision.CompareTag("Ground") || 
+            collision.CompareTag("Batas") ||
+            collision.gameObject.layer == LayerMask.NameToLayer("Turet") ||
+            collision.gameObject.layer == LayerMask.NameToLayer("Body")) 
         {
-            Instantiate(impactEffectPrefab, transform.position, Quaternion.identity);
+            return;
         }
 
-        // 2. Logika Damage (Opsional: Jika target punya script Health)
-        // collision.GetComponent<EnemyHealth>()?.TakeDamage(50);
+        // Deal damage if hit something with TankHealth
+        TankHealth health = collision.GetComponent<TankHealth>();
+        if (health == null)
+        {
+            // Check in parent in case collider is on a child object
+            health = collision.GetComponentInParent<TankHealth>();
+        }
 
-        Debug.Log("Impact: " + collision.name);
+        if (health != null)
+        {
+            health.TakeDamage(damage);
+        }
 
-        // 3. Hancurkan peluru setelah menabrak
+        // Meledak jika menabrak apa pun selain di atas (Tembok, Musuh, dll)
+        Explode();
+    }
+
+    private void Explode()
+    {
+        // Munculkan efek ledakan
+        if (impactEffectPrefab != null)
+        {
+            GameObject effect = Instantiate(impactEffectPrefab, transform.position, Quaternion.identity);
+            
+            // FIX: Pastikan efek ledakan juga berada di paling depan
+            SpriteRenderer effectSR = effect.GetComponent<SpriteRenderer>();
+            if (effectSR != null)
+            {
+                effectSR.sortingLayerName = "Turet";
+                effectSR.sortingOrder = 100;
+            }
+
+            ParticleSystem ps = effect.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                var renderer = ps.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingLayerName = "Turet";
+                    renderer.sortingOrder = 100;
+                }
+            }
+
+            // Hancurkan objek efek setelah 2 detik agar tidak menumpuk
+            Destroy(effect, 2f);
+        }
+
+        // Hancurkan peluru
         Destroy(gameObject);
     }
 }

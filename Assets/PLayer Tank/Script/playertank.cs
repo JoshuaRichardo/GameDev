@@ -7,7 +7,7 @@ public class PlayerTank : MonoBehaviour
     private Vector2 moveInput;
 
     [Header("Movement Settings")]
-    public float maxMoveSpeed = 5f;
+    public float maxMoveSpeed = 3f; // Reduced by 40% from 5f
     public float rotationSpeed = 100f;
 
     [Header("Acceleration Settings")]

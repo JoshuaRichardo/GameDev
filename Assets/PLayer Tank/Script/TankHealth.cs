@@ -63,17 +63,28 @@ public class TankHealth : MonoBehaviour
             healthBar.SetHealth(0);
         }
 
-        // PENGAMAN: Skrip di bawah ini hanya akan dimatikan JIKA komponennya memang ada di Tank.
-        // Ini mencegah "compiler error" atau "null reference" jika nama skrip berbeda.
-        if (TryGetComponent(out MonoBehaviour playerTank)) { playerTank.enabled = false; }
-        if (TryGetComponent(out MonoBehaviour tankShooting)) { tankShooting.enabled = false; }
+        // --- GABUNGAN SKRIP UNTUK MEMATIKAN KOMPONEN (PLAYER & ENEMY) ---
         
-        // Mematikan skrip turret di anak (child) objek jika ada
-        MonoBehaviour turretScript = GetComponentInChildren<MonoBehaviour>();
-        if (turretScript != null && turretScript.GetType().Name == "Tiger2Turret") 
-        { 
-            turretScript.enabled = false; 
-        }
+        // Mematikan skrip pergerakan & menembak milik Player
+        PlayerTank playerScript = GetComponent<PlayerTank>();
+        if (playerScript != null) playerScript.enabled = false;
+
+        TankShooting shootingScript = GetComponent<TankShooting>();
+        if (shootingScript != null) shootingScript.enabled = false;
+        
+        // Mematikan skrip turet (baik punya Player maupun Musuh)
+        Tiger2Turret playerTurret = GetComponentInChildren<Tiger2Turret>();
+        if (playerTurret != null) playerTurret.enabled = false;
+
+        EnemyTurret enemyTurret = GetComponentInChildren<EnemyTurret>();
+        if (enemyTurret != null) enemyTurret.enabled = false;
+
+        // Mematikan skrip milik Musuh (AI & nembak)
+        EnemyAI enemyAI = GetComponent<EnemyAI>();
+        if (enemyAI != null) enemyAI.enabled = false;
+
+        EnemyShooting enemyShooting = GetComponent<EnemyShooting>();
+        if (enemyShooting != null) enemyShooting.enabled = false;
 
         // Mematikan Collider agar tank hancur tidak bisa ditabrak lagi
         if (TryGetComponent(out Collider2D tankCollider)) { tankCollider.enabled = false; }
@@ -81,7 +92,7 @@ public class TankHealth : MonoBehaviour
         // Efek Ledakan
         if (explosionPrefab != null)
         {
-            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            Instantiate(explosionPrefab, transform.position, transform.rotation);
         }
 
         // Animasi Mati
@@ -91,8 +102,14 @@ public class TankHealth : MonoBehaviour
             anim.SetTrigger("Die"); 
         }
 
-        // Mengatur Audio
+        // Mengatur Audio (Matikan mesin, mainkan ledakan)
         if (engineSound != null) { engineSound.Stop(); }
         if (explosionSound != null) { explosionSound.Play(); }
+
+        // Jika ini bukan player (melainkan musuh), hancurkan object setelah 2 detik
+        if (playerScript == null)
+        {
+            Destroy(gameObject, 2f);
+        }
     }
 }
