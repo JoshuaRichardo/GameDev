@@ -47,18 +47,31 @@ public class TankHealth : MonoBehaviour
     {
         isDead = true;
 
-        GetComponent<PlayerTank>().enabled = false; 
-        GetComponent<TankShooting>().enabled = false;
+        PlayerTank playerScript = GetComponent<PlayerTank>();
+        if (playerScript != null) playerScript.enabled = false;
+
+        TankShooting shootingScript = GetComponent<TankShooting>();
+        if (shootingScript != null) shootingScript.enabled = false;
         
-        Tiger2Turret turretScript = GetComponentInChildren<Tiger2Turret>();
-        if (turretScript != null) turretScript.enabled = false;
+        // Coba cari script turet apa pun
+        Tiger2Turret playerTurret = GetComponentInChildren<Tiger2Turret>();
+        if (playerTurret != null) playerTurret.enabled = false;
+
+        EnemyTurret enemyTurret = GetComponentInChildren<EnemyTurret>();
+        if (enemyTurret != null) enemyTurret.enabled = false;
+
+        EnemyAI enemyAI = GetComponent<EnemyAI>();
+        if (enemyAI != null) enemyAI.enabled = false;
+
+        EnemyShooting enemyShooting = GetComponent<EnemyShooting>();
+        if (enemyShooting != null) enemyShooting.enabled = false;
 
         Collider2D tankCollider = GetComponent<Collider2D>();
         if (tankCollider != null) tankCollider.enabled = false;
 
         if (explosionPrefab != null)
         {
-            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+            Instantiate(explosionPrefab, transform.position, transform.rotation);
         }
 
         // Animator yang tadi mati, kita nyalakan SATU DETIK sebelum mati
@@ -78,6 +91,12 @@ public class TankHealth : MonoBehaviour
         if (explosionSound != null)
         {
             explosionSound.Play();
+        }
+
+        // Jika ini bukan player, mungkin mau hancurkan object setelah beberapa saat
+        if (playerScript == null)
+        {
+            Destroy(gameObject, 2f);
         }
     }
 }

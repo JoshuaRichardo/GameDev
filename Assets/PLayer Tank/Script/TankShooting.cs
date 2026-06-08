@@ -24,6 +24,8 @@ public class TankShooting : MonoBehaviour
     [Header("Audio")] // TAMBAHKAN INI
     public AudioSource shootSound; // TAMBAHKAN INI
 
+    public int bulletDamage = 100; // One hit to kill enemy
+
     private void Awake() => controls = new InputMaster();
     private void OnEnable() => controls.Player.Enable();
     private void OnDisable() => controls.Player.Disable();
@@ -49,10 +51,35 @@ public class TankShooting : MonoBehaviour
         // 1. Munculkan Peluru
         if (bulletPrefab != null && firePoint != null)
         {
-            Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
-            Instantiate(muzzleFlash, firePoint.position, firePoint.rotation);
-            Instantiate(smokeEffect, firePoint.position, firePoint.rotation);
+            GameObject bulletObj = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Bullet bulletScript = bulletObj.GetComponent<Bullet>();
+            if (bulletScript != null)
+            {
+                bulletScript.shooter = gameObject;
+                bulletScript.damage = bulletDamage;
+            }
+            
+            ParticleSystem mf = Instantiate(muzzleFlash, firePoint.position, firePoint.rotation);
+            if (mf != null)
+            {
+                var renderer = mf.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingLayerName = "Turet";
+                    renderer.sortingOrder = 100; // Tetap 100 agar di atas peluru (90)
+                }
+            }
 
+            ParticleSystem se = Instantiate(smokeEffect, firePoint.position, firePoint.rotation);
+            if (se != null)
+            {
+                var renderer = se.GetComponent<ParticleSystemRenderer>();
+                if (renderer != null)
+                {
+                    renderer.sortingLayerName = "Turet";
+                    renderer.sortingOrder = 100;
+                }
+            }
         }
 
         // 2. Efek Visual
