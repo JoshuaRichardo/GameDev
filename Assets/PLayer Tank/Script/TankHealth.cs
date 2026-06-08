@@ -18,6 +18,9 @@ public class TankHealth : MonoBehaviour
     public AudioSource engineSound; 
     public AudioSource explosionSound; 
 
+    public int GetCurrentHealth() => currentHealth;
+    public int GetMaxHealth() => maxHealth;
+
     void Start()
     {
         currentHealth = maxHealth;
