@@ -112,7 +112,25 @@ public class TankHealth : MonoBehaviour
         // Jika ini bukan player (melainkan musuh), hancurkan object setelah 2 detik
         if (playerScript == null)
         {
-            Destroy(gameObject, 2f);
+            // Leave burnt body (black color)
+            SpriteRenderer sr = GetComponent<SpriteRenderer>();
+            if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
+            if (sr != null)
+            {
+                sr.color = Color.black;
+            }
+
+            // Also check for child renderers (turret and body)
+            SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
+            foreach (var s in srs)
+            {
+                s.color = Color.black;
+            }
+
+            // Keep the object but disable physics/scripts (already done in Die())
+            // Instead of destroying after 2s, we just leave it.
+            // Or maybe destroy after a long time? The user said "leave burnt tank body".
+            // I will remove the Destroy call.
         }
     }
 }

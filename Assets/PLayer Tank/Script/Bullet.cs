@@ -63,16 +63,27 @@ public class Bullet : MonoBehaviour
         }
 
         // Deal damage if hit something with TankHealth
-        TankHealth health = collision.GetComponent<TankHealth>();
-        if (health == null)
-        {
-            // Check in parent in case collider is on a child object
-            health = collision.GetComponentInParent<TankHealth>();
-        }
+        TankArmor armor = collision.GetComponent<TankArmor>();
+        if (armor == null) armor = collision.GetComponentInParent<TankArmor>();
 
-        if (health != null)
+        if (armor != null)
         {
-            health.TakeDamage(damage);
+            // Pass the bullet's movement direction (transform.right)
+            armor.OnHit(transform.right, damage);
+        }
+        else
+        {
+            TankHealth health = collision.GetComponent<TankHealth>();
+            if (health == null)
+            {
+                // Check in parent in case collider is on a child object
+                health = collision.GetComponentInParent<TankHealth>();
+            }
+
+            if (health != null)
+            {
+                health.TakeDamage(damage);
+            }
         }
 
         // Meledak jika menabrak apa pun selain di atas (Tembok, Musuh, dll)

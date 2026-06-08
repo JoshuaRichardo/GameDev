@@ -24,8 +24,34 @@ public class EnemyShooting : MonoBehaviour
     {
         if (canShoot && gameObject.activeInHierarchy)
         {
-            StartCoroutine(ShootRoutine());
+            if (!IsFriendlyInWay())
+            {
+                StartCoroutine(ShootRoutine());
+            }
         }
+    }
+
+    private bool IsFriendlyInWay()
+    {
+        if (firePoint == null) return false;
+
+        // Raycast in the direction of fire to check for other enemies
+        float rayDistance = 10f; // Check up to 10 units
+        int layerMask = ~LayerMask.GetMask("Bullet"); // Ignore bullets
+
+        RaycastHit2D hit = Physics2D.Raycast(firePoint.position, firePoint.right, rayDistance, layerMask);
+
+        if (hit.collider != null)
+        {
+            // Check if we hit another enemy
+            // We can check if the object has an EnemyAI component
+            if (hit.collider.gameObject != gameObject && hit.collider.GetComponentInParent<EnemyAI>() != null)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     IEnumerator ShootRoutine()
