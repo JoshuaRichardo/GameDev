@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 5398479866243622697}
   - component: {fileID: 5290379739391053906}
   - component: {fileID: -3826526814955095367}
-  m_Layer: 0
+  - component: {fileID: 5300462005026208282}
+  m_Layer: 7
   m_Name: Bullet
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -28,7 +29,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8574284942286320148}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.78, y: 0.2, z: -0.03081262}
   m_LocalScale: {x: 0.1, y: 0.1, z: 0}
   m_ConstrainProportionsScale: 0
@@ -76,9 +77,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingLayerID: 999642693
+  m_SortingLayer: 2
+  m_SortingOrder: 30
   m_Sprite: {fileID: -570462789394145295, guid: dbbf0fd108c89e94fb553994926427d1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -171,3 +172,24 @@ MonoBehaviour:
   maxRange: 50
   impactEffectPrefab: {fileID: 0}
   bulletTrail: {fileID: 0}
+  damage: 100
+  shooter: {fileID: 0}
+--- !u!114 &5300462005026208282
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8574284942286320148}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d6785337ff13af74b97603e230990cec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  speed: 40
+  lifeTime: 3
+  maxRange: 50
+  impactEffectPrefab: {fileID: 0}
+  bulletTrail: {fileID: 0}
+  damage: 100
+  shooter: {fileID: 0}
