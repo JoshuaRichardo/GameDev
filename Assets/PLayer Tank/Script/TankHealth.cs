@@ -17,6 +17,9 @@ public class TankHealth : MonoBehaviour
     public AudioSource engineSound; 
     public AudioSource explosionSound; // TAMBAHAN BARU: Variabel untuk suara ledakan
 
+    public int GetCurrentHealth() => currentHealth;
+    public int GetMaxHealth() => maxHealth;
+
     void Start()
     {
         currentHealth = maxHealth;
