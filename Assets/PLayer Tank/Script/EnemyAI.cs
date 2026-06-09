@@ -61,7 +61,13 @@ public class EnemyAI : MonoBehaviour
 
     void Update()
     {
-        if (target == null || agent == null) return;
+        // Acquire the player lazily in case it wasn't available during Start.
+        if (target == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null) target = player.transform;
+            if (target == null) return;
+        }
 
         float distance = Vector2.Distance(transform.position, target.position);
 
@@ -70,39 +76,44 @@ public class EnemyAI : MonoBehaviour
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.Euler(0, 0, angle), 5f * Time.deltaTime);
 
-        if (type == EnemyType.Agro)
+        // Movement only when the agent is active on the NavMesh.
+        if (agent != null && agent.isOnNavMesh)
         {
-            if (distance > stoppingDistance)
+            if (type == EnemyType.Agro)
             {
+                if (distance > stoppingDistance)
+                {
+                    agent.isStopped = false;
+                    agent.SetDestination(target.position);
+                }
+                else if (distance < aggroKeepDistance)
+                {
+                    // Back up: find a point away from the player
+                    Vector3 awayPos = transform.position - (Vector3)direction * 2f;
+                    agent.isStopped = false;
+                    agent.SetDestination(awayPos);
+                }
+                else
+                {
+                    agent.isStopped = true;
+                }
+            }
+            else // Flanking
+            {
+                // Target the rear of the player
+                Vector3 rearPos = target.position - target.right * flankOffset;
+
+                flankAngle += Time.deltaTime * 20f;
+                Vector3 sideOffset = target.up * Mathf.Sin(flankAngle * Mathf.Deg2Rad) * (flankOffset * 0.5f);
+
+                Vector3 targetPos = rearPos + sideOffset;
+
                 agent.isStopped = false;
-                agent.SetDestination(target.position);
+                agent.SetDestination(targetPos);
             }
-            else if (distance < aggroKeepDistance)
-            {
-                // Back up: find a point away from the player
-                Vector3 awayPos = transform.position - (Vector3)direction * 2f;
-                agent.isStopped = false;
-                agent.SetDestination(awayPos);
-            }
-            else
-            {
-                agent.isStopped = true;
-            }
-        }
-        else // Flanking
-        {
-            // Target the rear of the player
-            Vector3 rearPos = target.position - target.right * flankOffset;
-            
-            flankAngle += Time.deltaTime * 20f;
-            Vector3 sideOffset = target.up * Mathf.Sin(flankAngle * Mathf.Deg2Rad) * (flankOffset * 0.5f);
-            
-            Vector3 targetPos = rearPos + sideOffset;
-            
-            agent.isStopped = false;
-            agent.SetDestination(targetPos);
         }
 
+        // Shooting is independent of navigation so the enemy can fire even when off-mesh.
         if (distance <= shootingRange)
         {
             if (shooting != null) shooting.TryShoot();

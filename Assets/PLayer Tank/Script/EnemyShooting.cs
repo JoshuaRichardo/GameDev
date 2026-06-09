@@ -6,7 +6,7 @@ public class EnemyShooting : MonoBehaviour
     [Header("Shooting Settings")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireRate = 2f; 
+    public float fireRate = 7f; // Reload time between shots (seconds)
     private bool canShoot = true;
 
     [Header("Effects")]
