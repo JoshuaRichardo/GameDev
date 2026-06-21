@@ -15,7 +15,7 @@ public class Checkpoint : MonoBehaviour
             PlayerPrefs.SetInt("HasCheckpoint", 1);
             PlayerPrefs.Save();
 
-            Debug.Log("Checkpoint Tersimpan di Watch Tower!");
+            Debug.Log("Checkpoint Level 1 Tersimpan di Watch Tower!");
         }
     }
 }
