@@ -9,7 +9,7 @@ public class TankShooting : MonoBehaviour
     [Header("Shooting Settings")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireRate = 2f; // Jeda antar tembakan (detik)
+    public float fireRate = 4f; // Jeda antar tembakan (detik)
     private bool canShoot = true;
 
     [Header("Recoil Settings (Realistic)")]
