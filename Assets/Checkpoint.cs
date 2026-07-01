@@ -1,21 +1,30 @@
 using UnityEngine;
+using UnityEngine.SceneManagement; // Wajib ditambahkan agar sistem tahu kita di map mana
 
-public class Checkpoint : MonoBehaviour
+public class CheckpointManager : MonoBehaviour
 {
+    [Header("Tulis penanda untuk Console (Misal: Level 2)")]
+    public string namaLevel;
+
     private void OnTriggerEnter2D(Collider2D collision)
     {
         // Mengecek apakah yang masuk ke dalam radius adalah tank pemain
         if (collision.CompareTag("Player"))
         {
-            // Menyimpan koordinat X dan Y dari Watch Tower ini ke memori permanen Unity
+            // 1. Menyimpan status checkpoint
+            PlayerPrefs.SetInt("HasCheckpoint", 1);
+            
+            // 2. Menyimpan koordinat X dan Y
             PlayerPrefs.SetFloat("CheckpointX", transform.position.x);
             PlayerPrefs.SetFloat("CheckpointY", transform.position.y);
             
-            // Memberi tanda (opsional) agar kita tahu checkpoint sudah tersimpan
-            PlayerPrefs.SetInt("HasCheckpoint", 1);
+            // 3. BARIS PALING PENTING: Menyimpan nama Map/Scene tempat menara ini berada!
+            PlayerPrefs.SetString("LevelCheckpoint", SceneManager.GetActiveScene().name);
+            
             PlayerPrefs.Save();
 
-            Debug.Log("Checkpoint Level 1 Tersimpan di Watch Tower!");
+            // Munculkan pesan sesuai nama level yang kamu ketik di Inspector
+            Debug.Log($"🔥 SISTEM: Checkpoint {namaLevel} Tersimpan!");
         }
     }
 }
