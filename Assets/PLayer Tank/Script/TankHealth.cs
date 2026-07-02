@@ -2,13 +2,16 @@ using UnityEngine;
 
 public class TankHealth : MonoBehaviour
 {
+    public GameData dataGame; // 1. Tarik file asset GameData ke sini di Inspector
+    public bool isPlayer = true; // 2. Centang ini di Inspector jika script ini menempel pada tank Player
+
     [Header("Status Tank")]
     public int maxHealth = 100;
     private int currentHealth;
     private bool isDead = false;
 
     [Header("UI Health Bar")]
-    public Healthbar healthBar; // Tarik objek UI HealthBar ke sini nanti
+    public Healthbar healthBar; 
 
     [Header("Efek Visual")]
     public GameObject explosionPrefab;
@@ -22,18 +25,35 @@ public class TankHealth : MonoBehaviour
     public int GetMaxHealth() => maxHealth;
 
     void Start()
+{
+    // Jika ini adalah tank player dan file GameData sudah dimasukkan
+    if (isPlayer && dataGame != null)
     {
-        currentHealth = maxHealth;
-
-        if (healthBar != null)
+        // PENCEGAHAN: Jika data kesehatan di data pusat kosong/0, baru set ke penuh
+        if (dataGame.currentHealth <= 0) 
         {
-            healthBar.SetMaxHealth(maxHealth);
+            dataGame.currentHealth = maxHealth;
         }
+
+        // AMBIL DARAH TERAKHIR dari asset data pusat (yang bernilai 55 itu)
+        currentHealth = dataGame.currentHealth; 
     }
+    else
+    {
+        // Jika ini tank musuh di Stage 2, berikan darah penuh secara default
+        currentHealth = maxHealth; 
+    }
+
+    // UPDATE visual UI Slider darah agar tidak tampil penuh secara salah
+    if (healthBar != null)
+    {
+        healthBar.SetMaxHealth(maxHealth);
+        healthBar.SetHealth(currentHealth); // Ini yang akan memaksa slider mencerminkan angka 55
+    }
+}
 
     void Update()
     {
-        // Tombol darurat K untuk ngetes mati
         if (Input.GetKeyDown(KeyCode.K) && !isDead)
         {
             Die();
@@ -46,6 +66,12 @@ public class TankHealth : MonoBehaviour
 
         currentHealth -= damage;
         
+        // 4. Jika Player terluka, update datanya ke GameData pusat
+        if (isPlayer && dataGame != null)
+        {
+            dataGame.currentHealth = currentHealth;
+        }
+
         if (healthBar != null)
         {
             healthBar.SetHealth(currentHealth);
@@ -66,71 +92,42 @@ public class TankHealth : MonoBehaviour
             healthBar.SetHealth(0);
         }
 
-        // --- GABUNGAN SKRIP UNTUK MEMATIKAN KOMPONEN (PLAYER & ENEMY) ---
-        
-        // Mematikan skrip pergerakan & menembak milik Player
+        // Jika Player mati, reset darah di GameData ke max untuk game berikutnya
+        if (isPlayer && dataGame != null)
+        {
+            dataGame.currentHealth = maxHealth;
+        }
+
+        // --- SISA SKRIP DIE() TETAP SAMA SEPERTI MILIKMU ---
         PlayerTank playerScript = GetComponent<PlayerTank>();
         if (playerScript != null) playerScript.enabled = false;
 
         TankShooting shootingScript = GetComponent<TankShooting>();
         if (shootingScript != null) shootingScript.enabled = false;
         
-        // Mematikan skrip turet (baik punya Player maupun Musuh)
         Tiger2Turret playerTurret = GetComponentInChildren<Tiger2Turret>();
         if (playerTurret != null) playerTurret.enabled = false;
 
         EnemyTurret enemyTurret = GetComponentInChildren<EnemyTurret>();
         if (enemyTurret != null) enemyTurret.enabled = false;
 
-        // Mematikan skrip milik Musuh (AI & nembak)
         EnemyAI enemyAI = GetComponent<EnemyAI>();
         if (enemyAI != null) enemyAI.enabled = false;
 
         EnemyShooting enemyShooting = GetComponent<EnemyShooting>();
         if (enemyShooting != null) enemyShooting.enabled = false;
 
-        // Mematikan Collider agar tank hancur tidak bisa ditabrak lagi
         if (TryGetComponent(out Collider2D tankCollider)) { tankCollider.enabled = false; }
 
-        // Efek Ledakan
-        if (explosionPrefab != null)
-        {
-            Instantiate(explosionPrefab, transform.position, transform.rotation);
-        }
-
-        // Animasi Mati
-        if (anim != null)
-        {
-            anim.enabled = true; 
-            anim.SetTrigger("Die"); 
-        }
-
-        // Mengatur Audio (Matikan mesin, mainkan ledakan)
+        if (explosionPrefab != null) Instantiate(explosionPrefab, transform.position, transform.rotation);
+        if (anim != null) { anim.enabled = true; anim.SetTrigger("Die"); }
         if (engineSound != null) { engineSound.Stop(); }
         if (explosionSound != null) { explosionSound.Play(); }
 
-        // Jika ini bukan player (melainkan musuh), hancurkan object setelah 2 detik
         if (playerScript == null)
         {
-            // Leave burnt body (black color)
-            SpriteRenderer sr = GetComponent<SpriteRenderer>();
-            if (sr == null) sr = GetComponentInChildren<SpriteRenderer>();
-            if (sr != null)
-            {
-                sr.color = Color.black;
-            }
-
-            // Also check for child renderers (turret and body)
             SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
-            foreach (var s in srs)
-            {
-                s.color = Color.black;
-            }
-
-            // Keep the object but disable physics/scripts (already done in Die())
-            // Instead of destroying after 2s, we just leave it.
-            // Or maybe destroy after a long time? The user said "leave burnt tank body".
-            // I will remove the Destroy call.
+            foreach (var s in srs) { s.color = Color.black; }
         }
     }
 }

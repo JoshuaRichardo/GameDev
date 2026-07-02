@@ -2,50 +2,44 @@ using UnityEngine;
 
 public class jarakmap : MonoBehaviour
 {
-    public Transform titikStartMap;   // Batas Kiri Map
-    public Transform titikPortalMap;  // Batas Kanan Map
+    [Header("Tarik Objek Penanda dari Hierarchy")]
+    public Transform titikStartMap;   // Objek titik awal tank lahir di map ini
+    public Transform titikPortalMap;  // Tarik objek Zona_PindahLevel milik map ini!
 
-    private Transform tankTransform;
     private TankProgressBar uiProgressBar;
 
     void Start()
     {
-        // Otomatis mendeteksi Tank tempat skrip ini menempel
-        tankTransform = this.transform;
+        CariProgressBar();
+    }
 
-        // Otomatis mencari progress bar di UI
-        uiProgressBar = FindObjectOfType<TankProgressBar>();
+    void CariProgressBar()
+    {
+        uiProgressBar = FindFirstObjectByType<TankProgressBar>();
     }
 
     void Update()
     {
-        if (uiProgressBar == null || tankTransform == null || titikStartMap == null || titikPortalMap == null) 
-            return;
+        if (uiProgressBar == null)
+        {
+            CariProgressBar();
+            if (uiProgressBar == null) return;
+        }
+
+        if (titikStartMap == null || titikPortalMap == null) return;
 
         float startX = titikStartMap.position.x;
         float portalX = titikPortalMap.position.x;
-        float tankX = tankTransform.position.x;
+        float tankX = transform.position.x;
 
-        // Hitung total lebar map (jarak batas kiri ke batas kanan)
         float totalLebarMap = portalX - startX;
+        if (totalLebarMap == 0f) return;
 
-        // Jika total lebar map minus atau nol, berarti posisi objek di Unity terbalik/salah koordinat
-        if (totalLebarMap <= 0f)
-        {
-            // Balik rumusnya jika Anda meletakkan posisi portal di kiri dan start di kanan
-            totalLebarMap = startX - portalX;
-        }
-
-        // Hitung berapa jarak yang sudah ditempuh tank dari titik start
-        float jarakDitempuh = tankX - startX;
-
-        // Ubah menjadi persentase 0.0f sampai 1.0f
-        float hasilPersen = jarakDitempuh / totalLebarMap;
-
-        // Batasi hasilnya agar tidak minus jika tank mundur lewat dari batas kiri
+        // Hitung persentase berjalan dari 0.0 sampai 1.0 di dalam map ini
+        float hasilPersen = (tankX - startX) / totalLebarMap;
         hasilPersen = Mathf.Clamp01(hasilPersen);
 
-        // Kirim data secara real-time ke UI
+        // Kirim persentase pergerakan ini ke UI Progress Bar secara real-time
         uiProgressBar.UpdateLocalProgress(hasilPersen);
     }
 }

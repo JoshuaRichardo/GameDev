@@ -1,5 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI; // Wajib ada agar mengenali komponen Slider
+using UnityEngine.UI;
 
 public class Healthbar : MonoBehaviour
 {
@@ -15,7 +15,7 @@ public class Healthbar : MonoBehaviour
         if (slider != null)
         {
             slider.maxValue = health;
-            slider.value = health;
+            // slider.value = health; // Hapus baris ini agar tidak memaksa slider penuh kembali saat pindah scene
         }
     }
 
