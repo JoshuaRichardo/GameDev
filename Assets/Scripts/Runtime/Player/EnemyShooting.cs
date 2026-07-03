@@ -1,8 +1,28 @@
 using UnityEngine;
 using System.Collections;
 
+/// <summary>
+/// Handles enemy tank shooting logic with automatic per-type audio pitch.
+/// Assign tank-shoot.mp3 to shootClip once — pitch is driven entirely by
+/// the shooterType enum so no manual AudioSource configuration is needed.
+/// </summary>
+[RequireComponent(typeof(AudioSource))]
 public class EnemyShooting : MonoBehaviour
 {
+    // ── Types ─────────────────────────────────────────────────────────────────
+
+    public enum ShooterType { Default, Aggro, Flanker }
+
+    // Pitch applied per type. Aggro sounds deeper; Flanker sounds sharper.
+    private const float PitchDefault = 1.0f;
+    private const float PitchAggro   = 0.7f;
+    private const float PitchFlanker = 1.5f;
+
+    // Max ± random pitch offset added on every shot for subtle variation.
+    private const float PitchVariance = 0.05f;
+
+    // ── Inspector ─────────────────────────────────────────────────────────────
+
     [Header("Shooting Settings")]
     public GameObject bulletPrefab;
     public Transform firePoint;
@@ -14,11 +34,35 @@ public class EnemyShooting : MonoBehaviour
     public ParticleSystem smokeEffect;
 
     [Header("Audio")]
-    public AudioSource shootSound;
+    [Tooltip("Assign tank-shoot.mp3. The same clip is shared across all enemy types.")]
+    [SerializeField] private AudioClip shootClip;
+
+    [Tooltip("Controls pitch automatically: Default = 1.0, Aggro = 0.7 (deep), Flanker = 1.5 (sharp).")]
+    [SerializeField] private ShooterType shooterType = ShooterType.Default;
 
     [Header("Combat Settings")]
     public float missChance = 0.35f; // 35% chance to miss
     public int bulletDamage = 25; // 4 hits to kill player (100 HP)
+
+    private AudioSource audioSource;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        audioSource.playOnAwake = false;
+        audioSource.clip = shootClip;
+    }
+
+    /// <summary>Returns the base pitch for the assigned shooter type.</summary>
+    private float ResolveBasePitch()
+    {
+        return shooterType switch
+        {
+            ShooterType.Aggro   => PitchAggro,
+            ShooterType.Flanker => PitchFlanker,
+            _                   => PitchDefault,
+        };
+    }
 
     public void TryShoot()
     {
@@ -100,7 +144,11 @@ public class EnemyShooting : MonoBehaviour
             }
         }
 
-        if (shootSound != null) shootSound.Play();
+        if (shootClip != null)
+        {
+            audioSource.pitch = ResolveBasePitch() + Random.Range(-PitchVariance, PitchVariance);
+            audioSource.PlayOneShot(shootClip);
+        }
 
         yield return new WaitForSeconds(fireRate);
         canShoot = true;
