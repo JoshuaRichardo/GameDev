@@ -2,8 +2,8 @@ using UnityEngine;
 
 public class TankHealth : MonoBehaviour
 {
-    public GameData dataGame; 
-    public bool isPlayer = true; 
+    public GameData dataGame; // 1. Tarik file asset GameData ke sini di Inspector
+    public bool isPlayer = true; // 2. Centang ini di Inspector jika script ini menempel pada tank Player
 
     [Header("Status Tank")]
     public int maxHealth = 100;
@@ -13,12 +13,6 @@ public class TankHealth : MonoBehaviour
     [Header("UI Health Bar")]
     public Healthbar healthBar; 
 
-    // ==========================================
-    // TAMBAHAN UNTUK PANEL GAME OVER
-    // ==========================================
-    [Header("UI Game Over")]
-    public GameObject layarGameOver; // Tarik Panel_GameOver ke sini di Inspector
-
     [Header("Efek Visual")]
     public GameObject explosionPrefab;
     public Animator anim; 
@@ -26,32 +20,37 @@ public class TankHealth : MonoBehaviour
     [Header("Audio")] 
     public AudioSource engineSound; 
     public AudioSource explosionSound; 
-    public AudioSource musikLatarGame; // Tarik objek BGM/Backsound utama ke sini
 
     public int GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
 
     void Start()
+{
+    // Jika ini adalah tank player dan file GameData sudah dimasukkan
+    if (isPlayer && dataGame != null)
     {
-        if (isPlayer && dataGame != null)
+        // PENCEGAHAN: Jika data kesehatan di data pusat kosong/0, baru set ke penuh
+        if (dataGame.currentHealth <= 0) 
         {
-            if (dataGame.currentHealth <= 0) 
-            {
-                dataGame.currentHealth = maxHealth;
-            }
-            currentHealth = dataGame.currentHealth; 
-        }
-        else
-        {
-            currentHealth = maxHealth; 
+            dataGame.currentHealth = maxHealth;
         }
 
-        if (healthBar != null)
-        {
-            healthBar.SetMaxHealth(maxHealth);
-            healthBar.SetHealth(currentHealth); 
-        }
+        // AMBIL DARAH TERAKHIR dari asset data pusat (yang bernilai 55 itu)
+        currentHealth = dataGame.currentHealth; 
     }
+    else
+    {
+        // Jika ini tank musuh di Stage 2, berikan darah penuh secara default
+        currentHealth = maxHealth; 
+    }
+
+    // UPDATE visual UI Slider darah agar tidak tampil penuh secara salah
+    if (healthBar != null)
+    {
+        healthBar.SetMaxHealth(maxHealth);
+        healthBar.SetHealth(currentHealth); // Ini yang akan memaksa slider mencerminkan angka 55
+    }
+}
 
     void Update()
     {
@@ -67,6 +66,7 @@ public class TankHealth : MonoBehaviour
 
         currentHealth -= damage;
         
+        // 4. Jika Player terluka, update datanya ke GameData pusat
         if (isPlayer && dataGame != null)
         {
             dataGame.currentHealth = currentHealth;
@@ -92,11 +92,13 @@ public class TankHealth : MonoBehaviour
             healthBar.SetHealth(0);
         }
 
+        // Jika Player mati, reset darah di GameData ke max untuk game berikutnya
         if (isPlayer && dataGame != null)
         {
             dataGame.currentHealth = maxHealth;
         }
 
+        // --- SISA SKRIP DIE() TETAP SAMA SEPERTI MILIKMU ---
         PlayerTank playerScript = GetComponent<PlayerTank>();
         if (playerScript != null) playerScript.enabled = false;
 
@@ -122,29 +124,8 @@ public class TankHealth : MonoBehaviour
         if (engineSound != null) { engineSound.Stop(); }
         if (explosionSound != null) { explosionSound.Play(); }
 
-        // ========================================================
-        // LOGIKA EKSTRA KHUSUS JIKA YANG MATI ADALAH PLAYER
-        // ========================================================
-        if (isPlayer)
+        if (playerScript == null)
         {
-            // 1. Munculkan panel Game Over
-            if (layarGameOver != null)
-            {
-                layarGameOver.SetActive(true);
-            }
-
-            // 2. Matikan backsound/musik latar utama game
-            if (musikLatarGame != null)
-            {
-                musikLatarGame.Stop();
-            }
-
-            // 3. Bekukan waktu game (seperti sistem pause/victory)
-            Time.timeScale = 0f;
-        }
-        else
-        {
-            // Jika yang mati adalah musuh, jalankan kode pewarnaan hitam milikmu sebelumnya
             SpriteRenderer[] srs = GetComponentsInChildren<SpriteRenderer>();
             foreach (var s in srs) { s.color = Color.black; }
         }
