@@ -9,4 +9,3 @@ Fire Cannon       : Mouse Left Button
 
 Surrender         : K
 
-EXIT GAME         : ALT + F4 :)
